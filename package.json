@@ -1,0 +1,28 @@
+{
+  "name": "dimas-kmeans",
+  "version": "1.0.0",
+  "description": "K-Means implementation in JavaScript",
+  "main": "dimas-kmeans.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shudima/dimas-kmeans.git"
+  },
+  "keywords": [
+    "kmeans",
+    "K-Means",
+    "javascript",
+    "nodejs",
+    "node",
+    "clustering",
+    "dimas"
+  ],
+  "author": "Dima Shulga",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shudima/dimas-kmeans/issues"
+  },
+  "homepage": "https://github.com/shudima/dimas-kmeans#readme"
+}
