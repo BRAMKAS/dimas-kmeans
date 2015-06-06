@@ -1,6 +1,6 @@
 {
   "name": "dimas-kmeans",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "K-Means implementation in JavaScript",
   "main": "dimas-kmeans.js",
   "scripts": {
