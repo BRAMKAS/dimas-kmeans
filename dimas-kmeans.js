@@ -2,16 +2,26 @@ module.exports = {
 	getClusters : getClusters
 }
 
-function getClusters(data, numberOfClusters) {
 
-	var numberOfDimensions = getNumnerOfDimensions(data);
+function getClusters(data, options) {
 
-	if (!numberOfClusters) { numberOfClusters = getNumberOfClusters(data.length) };
+	var numberOfClusters, distanceFunction, vectorFunction, minMaxValues;
 
-	minMaxValues = getMinAndMaxValues(data, numberOfDimensions);
+	if (!options.numberOfClusters) { numberOfClusters = getNumberOfClusters(data.length); }
+	else { numberOfClusters = options.numberOfClusters; }
+
+	if (!options.distanceFunction) { distanceFunction = getDistance; }
+	else { distanceFunction = options.distanceFunction; }
+	
+	if (!options.vectorFunction) { vectorFunction = defaultVectorFunction; }
+	else { vectorFunction = options.vectorFunction; }
 
 
-	var maxIterations = 1000;
+	var numberOfDimensions = getNumnerOfDimensions(data, vectorFunction);
+
+	minMaxValues = getMinAndMaxValues(data, numberOfDimensions, vectorFunction);
+
+	var maxIterations = 10000;
 
 	var means = createRandomMeans(numberOfDimensions, numberOfClusters, minMaxValues);
 
@@ -25,20 +35,27 @@ function getClusters(data, numberOfClusters) {
 
 		initClustersData(clusters);
 
-		assignDataToClusters(data, clusters)
+		assignDataToClusters(data, clusters, distanceFunction, vectorFunction)
 
-		updateMeans(clusters);
+		updateMeans(clusters, vectorFunction);
 
-		var meansDistance = getMeansDistance(clusters);
+		var meansDistance = getMeansDistance(clusters, vectorFunction);
 
+		
 		numOfInterations++;
 	}
+	
+	console.log(getMeansDistance(clusters, vectorFunction));
 
 	return clusters;
 }
 
-function getNumnerOfDimensions(data) {
-	if (data[0]) { return data[0].length};
+function defaultVectorFunction(vector) {
+	return vector;
+}
+
+function getNumnerOfDimensions(data, vectorFunction) {
+	if (data[0]) { return vectorFunction(data[0]).length};
 
 	return 0;
 }
@@ -47,7 +64,7 @@ function getNumberOfClusters(n) {
 	return Math.ceil(Math.sqrt(n/2));
 }
 
-function getMinAndMaxValues(data, numberOfDimensions) {
+function getMinAndMaxValues(data, numberOfDimensions, vectorFunction) {
 
 	var minMaxValues = initMinAndMaxValues(numberOfDimensions);
 
@@ -55,13 +72,12 @@ function getMinAndMaxValues(data, numberOfDimensions) {
 
 		for (var i = 0; i < numberOfDimensions; i++) {
 			
-
-			if (vector[i] < minMaxValues.minValue[i]) {
-				minMaxValues.minValue[i] = vector[i];
+			if (vectorFunction(vector)[i] < minMaxValues.minValue[i]) {
+				minMaxValues.minValue[i] = vectorFunction(vector)[i];
 			}
 
-			if(vector[i] > minMaxValues.maxValue[i]) {
-				minMaxValues.maxValue[i] = vector[i];
+			if(vectorFunction(vector)[i] > minMaxValues.maxValue[i]) {
+				minMaxValues.maxValue[i] = vectorFunction(vector)[i];
 			}
 		};
 	});
@@ -94,7 +110,7 @@ function printMeans(clusters) {
 	console.log(means);
 }
 
-function getMeansDistance(clusters) {
+function getMeansDistance(clusters, vectorFunction) {
 
 	var meansDistance = 0;
 
@@ -102,7 +118,7 @@ function getMeansDistance(clusters) {
 
 		cluster.data.forEach(function (vector) {
 
-			meansDistance = meansDistance + Math.pow(getDistance(cluster.mean, vector), 2)
+			meansDistance = meansDistance + Math.pow(getDistance(cluster.mean, vectorFunction(vector)), 2)
 		});
 	});
 
@@ -110,21 +126,21 @@ function getMeansDistance(clusters) {
 	return meansDistance;
 }
 
-function updateMeans(clusters) {
+function updateMeans(clusters, vectorFunction) {
 
 	clusters.forEach(function (cluster) {
-		updateMean(cluster);
+		updateMean(cluster, vectorFunction);
 
 	});
 }
 
 
-function updateMean(cluster) {
+function updateMean(cluster, vectorFunction) {
 
 	var newMean = [];
 
 	for (var i = 0; i < cluster.mean.length; i++) {
-		newMean.push(getMean(cluster.data, i));
+		newMean.push(getMean(cluster.data, i, vectorFunction));
 	};
 
 
@@ -132,7 +148,7 @@ function updateMean(cluster) {
 
 }
 
-function getMean(data, index) {
+function getMean(data, index, vectorFunction) {
 	var sum =  0;
 	var total = data.length;
 
@@ -140,31 +156,31 @@ function getMean(data, index) {
 
 	data.forEach(function (vector) {
 
-			sum = sum + vector[index];
+			sum = sum + vectorFunction(vector)[index];
 	});
 
 
 	return sum / total;
 }
 
-function assignDataToClusters(data, clusters) {
+function assignDataToClusters(data, clusters, distanceFunction, vectorFunction) {
 
 
 	data.forEach(function (vector) {
-		var cluster = findClosestCluster(vector, clusters)
+		var cluster = findClosestCluster(vectorFunction(vector), clusters, distanceFunction)
 		cluster.data.push(vector);
 	});
 }
 
 
-function findClosestCluster(vector, clusters) {
+function findClosestCluster(vector, clusters, distanceFunction) {
 
 	var closest = {};
 	var minDistance = 9999999;
 
 	clusters.forEach(function (cluster) {
-
-		var distance = getDistance(cluster.mean, vector);
+		
+		var distance = distanceFunction(cluster.mean, vector);
 		if (distance < minDistance) {
 			minDistance = distance;
 			closest = cluster;
@@ -209,7 +225,7 @@ function createRandomPoint(numberOfDimensions, minValue, maxValue) {
 	for (var i = 0; i < numberOfDimensions; i++) {
 		point.push(random(minValue, maxValue));
 	};
-
+	
 	return point;
 }
 
