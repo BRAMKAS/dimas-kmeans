@@ -7,13 +7,13 @@ function getClusters(data, options) {
 
 	var numberOfClusters, distanceFunction, vectorFunction, minMaxValues;
 
-	if (!options.numberOfClusters) { numberOfClusters = getNumberOfClusters(data.length); }
+	if (!options || !options.numberOfClusters) { numberOfClusters = getNumberOfClusters(data.length); }
 	else { numberOfClusters = options.numberOfClusters; }
 
-	if (!options.distanceFunction) { distanceFunction = getDistance; }
+	if (!options || !options.distanceFunction) { distanceFunction = getDistance; }
 	else { distanceFunction = options.distanceFunction; }
 	
-	if (!options.vectorFunction) { vectorFunction = defaultVectorFunction; }
+	if (!options || !options.vectorFunction) { vectorFunction = defaultVectorFunction; }
 	else { vectorFunction = options.vectorFunction; }
 
 
