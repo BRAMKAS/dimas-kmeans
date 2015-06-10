@@ -4,7 +4,7 @@ module.exports = {
 
 function getClusters(data, options) {
 
-	var numberOfClusters, distanceFunction, vectorFunction, minMaxValues;
+	var numberOfClusters, distanceFunction, vectorFunction, minMaxValues, maxIterations;
 
 	if (!options || !options.numberOfClusters) { numberOfClusters = getNumberOfClusters(data.length); }
 	else { numberOfClusters = options.numberOfClusters; }
@@ -13,16 +13,17 @@ function getClusters(data, options) {
 	else { distanceFunction = options.distanceFunction; }
 	
 	if (!options || !options.vectorFunction) { vectorFunction = defaultVectorFunction; }
-	else { vectorFunction = options.vectorFunction; }
+    else { vectorFunction = options.vectorFunction; }
+    
+    if (!options || !options.maxIterations) { maxIterations = 1000; }
+    else { maxIterations = options.maxIterations; }
 
 
 	var numberOfDimensions = getNumnerOfDimensions(data, vectorFunction);
 
 	minMaxValues = getMinAndMaxValues(data, numberOfDimensions, vectorFunction);
 
-	var maxIterations = 10000;
-
-	return getClustersWithParams(data, numberOfDimensions, numberOfClusters, distanceFunction, vectorFunction, minMaxValues, maxIterations);
+	return getClustersWithParams(data, numberOfDimensions, numberOfClusters, distanceFunction, vectorFunction, minMaxValues, maxIterations).clusters;
 }
 
 
@@ -34,25 +35,28 @@ function getClustersWithParams(data, numberOfDimensions ,numberOfClusters, dista
 
 	var prevMeansDistance = 999999;
 
-	var numOfInterations = 0;
+    var numOfInterations = 0;
+    var iterations = [];
+
 
 	while(numOfInterations < maxIterations) {
 
 		initClustersData(clusters);
 
-		assignDataToClusters(data, clusters, distanceFunction, vectorFunction)
+	    assignDataToClusters(data, clusters, distanceFunction, vectorFunction);
 
 		updateMeans(clusters, vectorFunction);
 
-		var meansDistance = getMeansDistance(clusters, vectorFunction);
+		var meansDistance = getMeansDistance(clusters, vectorFunction, distanceFunction);
 
-		
-		numOfInterations++;
+	    //iterations.push(meansDistance);
+        console.log(numOfInterations + ': ' + meansDistance);
+        numOfInterations++;
 	}
 	
-	console.log(getMeansDistance(clusters, vectorFunction));
+	console.log(getMeansDistance(clusters, vectorFunction, distanceFunction));
 
-	return clusters;
+    return { clusters: clusters, iterations: iterations };
 }
 
 function defaultVectorFunction(vector) {
@@ -60,8 +64,9 @@ function defaultVectorFunction(vector) {
 }
 
 function getNumnerOfDimensions(data, vectorFunction) {
-	if (data[0]) { return vectorFunction(data[0]).length};
-
+    if (data[0]) {
+        return vectorFunction(data[0]).length;
+    }  
 	return 0;
 }
 
@@ -115,7 +120,7 @@ function printMeans(clusters) {
 	console.log(means);
 }
 
-function getMeansDistance(clusters, vectorFunction) {
+function getMeansDistance(clusters, vectorFunction, distanceFunction) {
 
 	var meansDistance = 0;
 
@@ -123,7 +128,7 @@ function getMeansDistance(clusters, vectorFunction) {
 
 		cluster.data.forEach(function (vector) {
 
-			meansDistance = meansDistance + Math.pow(getDistance(cluster.mean, vectorFunction(vector)), 2)
+		    meansDistance = meansDistance + Math.pow(distanceFunction(cluster.mean, vectorFunction(vector)), 2);
 		});
 	});
 
@@ -172,7 +177,7 @@ function assignDataToClusters(data, clusters, distanceFunction, vectorFunction) 
 
 
 	data.forEach(function (vector) {
-		var cluster = findClosestCluster(vectorFunction(vector), clusters, distanceFunction)
+	    var cluster = findClosestCluster(vectorFunction(vector), clusters, distanceFunction);
 		cluster.data.push(vector);
 	});
 }
