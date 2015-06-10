@@ -2,7 +2,6 @@ module.exports = {
 	getClusters : getClusters
 }
 
-
 function getClusters(data, options) {
 
 	var numberOfClusters, distanceFunction, vectorFunction, minMaxValues;
@@ -23,6 +22,12 @@ function getClusters(data, options) {
 
 	var maxIterations = 10000;
 
+	return getClustersWithParams(data, numberOfDimensions, numberOfClusters, distanceFunction, vectorFunction, minMaxValues, maxIterations);
+}
+
+
+function getClustersWithParams(data, numberOfDimensions ,numberOfClusters, distanceFunction, vectorFunction, minMaxValues, maxIterations) {
+	
 	var means = createRandomMeans(numberOfDimensions, numberOfClusters, minMaxValues);
 
 	var clusters = createClusters(means);
