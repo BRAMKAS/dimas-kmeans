@@ -178,6 +178,9 @@ function assignDataToClusters(data, clusters, distanceFunction, vectorFunction) 
 
 	data.forEach(function (vector) {
 	    var cluster = findClosestCluster(vectorFunction(vector), clusters, distanceFunction);
+
+	    if(!cluster.data) cluster.data = [];
+		
 		cluster.data.push(vector);
 	});
 }
