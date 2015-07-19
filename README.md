@@ -1,8 +1,7 @@
 # dimas-kmeans
 Simple implementation of K-Means in Javascript
-####Usage:
 
-######getClusters(data)
+##### getClusters(data, [numberOfClusters])
 data : The data for clusterization, should be array of vectors (arrays), 
 numberOfClusters : Optional, the default is Root of the size of the data divided by two.
 
@@ -18,11 +17,10 @@ numberOfClusters : Optional, the default is Root of the size of the data divided
 
 	var clusters = kmeans.getClusters(data);
 
-The result should be:
-######Cluster 1
------------------
-[ [ 10, 11 ], [ 12, 13 ] ]
+###### The result should be:
 
-######Cluster 2
------------------
-[ [ 1, 2 ], [ 2, 1 ] ]
+```
+clusters[0]: [ [ 10, 11 ], [ 12, 13 ] ]
+
+clusters[1]: [ [ 1, 2 ], [ 2, 1 ] ]
+```
